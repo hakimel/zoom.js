@@ -1,0 +1,37 @@
+html, body {
+	font-family: 'Lato', Times, 'Times New Roman', serif;
+	font-size: 16px;
+	color: #eee;
+}
+
+body {
+	margin: 20px;
+}
+
+html {
+	background: #323232;
+}
+
+h2 {
+	margin-bottom: 5px;
+	
+	color: #eee;
+	
+	font-family: 'Lato', sans-serif;
+	line-height: 0.9em;
+	letter-spacing: 0.02em;
+	
+	font-weight: bold;
+}
+
+p {
+	margin: 0px 80px 40px 0px;
+}
+
+#main {
+	-webkit-columns: 2;
+	   -moz-columns: 2;
+	    -ms-columns: 2;
+	     -o-columns: 2;
+	        columns: 2;
+}
