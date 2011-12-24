@@ -92,18 +92,6 @@ var zoom = (function(){
 		}
 	}
 
-	function position( element ) {
-		var p = { x: 0, y: 0 };
-		
-		do {
-			p.x += element.offsetLeft;
-			p.y += element.offsetTop;
-		}
-		while ( element = element.offsetParent )
-
-		return p;
-	}
-
 	return {
 		in: function( options ) {
 			if( level !== 1 ) {

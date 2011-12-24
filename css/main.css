@@ -5,11 +5,19 @@ html, body {
 }
 
 body {
-	margin: 20px;
+	margin: 0px;
 }
 
 html {
 	background: #323232;
+}
+
+header {
+	background: rgba(0, 0, 0, 0.2);
+	margin-bottom: 30px;
+	padding: 20px 100px 20px 20px;
+	font-size: 20px;
+	line-height: 1.3em;
 }
 
 h2 {
@@ -26,9 +34,16 @@ h2 {
 
 p {
 	margin: 0px 80px 40px 0px;
+	line-height: 1.1em;
+}
+
+a {
+	color: cyan;
 }
 
 #main {
+	margin: 20px;
+
 	-webkit-columns: 2;
 	   -moz-columns: 2;
 	    -ms-columns: 2;
