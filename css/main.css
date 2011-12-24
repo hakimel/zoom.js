@@ -44,9 +44,9 @@ a {
 #main {
 	margin: 20px;
 
-	-webkit-columns: 2;
-	   -moz-columns: 2;
-	    -ms-columns: 2;
-	     -o-columns: 2;
-	        columns: 2;
+	-webkit-column-count: 2;
+	   -moz-column-count: 2;
+	    -ms-column-count: 2;
+	     -o-column-count: 2;
+	        column-count: 2;
 }
