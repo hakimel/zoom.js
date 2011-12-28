@@ -19,31 +19,67 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  * 
- * zoom.js enables an easy API for magnifying the DOM on 
- * any given location. It also supports zooming in on a
- * specific element, much like double tapping does in 
- * Mobile Safari.
  * 
- * Currently just a proof of concept so expect bugs. Lots 
- * of bugs.
+ * #############################################################################
+ * 
+ * 
+ * zoom.js enables an easy API for magnifying the DOM on 
+ * any given location. It supports zooming in on either a 
+ * rectangle or element in the current document:
+ * 
+ * zoom.in({ 
+ * 	element: document.querySelector( 'img' ) 
+ * });
+ * 
+ * zoom.in({
+ *   x: 100,
+ *   y: 200,
+ *   width: 300,
+ *   height: 300
+ * });
+ * 
+ * zoom.out();
+ * 
+ * 
+ * 
+ * Note #1: this is currently just a proof of concept, don't 
+ * use it for anything important.
+ * 
+ * Note #2: zoom.js works by adjusting the transform, transition,
+ * transform-origin and zoom (IE) CSS properties of the <body> node
+ * and may conflict with your own styles. 
  * 
  * @author Hakim El Hattab | http://hakim.se
+ * @version 0.1
  */
 var zoom = (function(){
 
 	// The current zoom level (scale)
-	var level = 1,
-		mouseX = 0,
-		mouseY = 0,
-		panEngageTimeout = -1,
+	var level = 1;
+	
+	// The current mouse position, used for panning
+	var mouseX = 0,
+		mouseY = 0;
+	
+	// Timeout before pan is activated
+	var panEngageTimeout = -1,
 		panUpdateInterval = -1;
 
-	// The easing that will be applied when we zoom in/out
-	document.body.style.WebkitTransition = '-webkit-transform 0.8s ease';
-	document.body.style.MozTransition = '-moz-transform 0.8s ease';
-	document.body.style.msTransition = '-ms-transform 0.8s ease';
-	document.body.style.OTransition = '-o-transform 0.8s ease';
-	document.body.style.transition = 'transform 0.8s ease';
+	// Check for transform support so that we can fallback otherwise
+	var supportsTransforms =  document.body.style.WebkitTransform !== undefined || 
+                    		  document.body.style.MozTransform !== undefined ||
+                    		  document.body.style.msTransform !== undefined ||
+                    		  document.body.style.OTransform !== undefined ||
+                    		  document.body.style.transform !== undefined;
+    
+	if( supportsTransforms ) {
+		// The easing that will be applied when we zoom in/out
+		document.body.style.WebkitTransition = '-webkit-transform 0.8s ease';
+		document.body.style.MozTransition = '-moz-transform 0.8s ease';
+		document.body.style.msTransition = '-ms-transform 0.8s ease';
+		document.body.style.OTransition = '-o-transform 0.8s ease';
+		document.body.style.transition = 'transform 0.8s ease';
+	}
 	
 	// Zoom out if the user hits escape
 	document.addEventListener( 'keyup', function( event ) {
@@ -60,16 +96,63 @@ var zoom = (function(){
 		}
 	} );
 
-	function prefix( property, value ) {
-		document.body.style[ 'Webkit' + property ] = value;
-		document.body.style[ 'Moz' + property ] = value;
-		document.body.style[ 'ms' + property ] = value;
-		document.body.style[ 'O' + property ] = value;
-		document.body.style[ property ] = value;
+	/**
+	 * Applies the CSS required to zoom in, prioritizes use of CSS3 
+	 * transforms but falls back on zoom for IE.
+	 * 
+	 * @param {Number} pageOffsetX 
+	 * @param {Number} pageOffsetY 
+	 * @param {Number} elementOffsetX 
+	 * @param {Number} elementOffsetY 
+	 * @param {Number} scale 
+	 */
+	function magnify( pageOffsetX, pageOffsetY, elementOffsetX, elementOffsetY, scale ) {
+		if( supportsTransforms ) {
+			var origin = pageOffsetX +'px '+ pageOffsetY +'px',
+				transform = 'translate( '+ -elementOffsetX +'px, '+ -elementOffsetY +'px ) scale( '+ scale +' )';
+			
+			document.body.style.WebkitTransformOrigin = origin;
+			document.body.style.MozTransformOrigin = origin;
+			document.body.style.msTransformOrigin = origin;
+			document.body.style.OTransformOrigin = origin;
+			document.body.style.transformOrigin = origin;
+
+			document.body.style.WebkitTransform = transform;
+			document.body.style.MozTransform = transform;
+			document.body.style.msTransform = transform;
+			document.body.style.OTransform = transform;
+			document.body.style.transform = transform;
+		}
+		else {
+			// Reset all values
+			if( scale === 1 ) {
+				document.body.style.position = '';
+				document.body.style.left = '';
+				document.body.style.top = '';
+				document.body.style.width = '';
+				document.body.style.height = '';
+				document.body.style.zoom = '';
+			}
+			// Apply scale
+			else {
+				document.body.style.position = 'relative';
+				document.body.style.left = ( - ( pageOffsetX + elementOffsetX ) / scale ) + 'px';
+				document.body.style.top = ( - ( pageOffsetY + elementOffsetY ) / scale ) + 'px';
+				document.body.style.width = ( scale * 100 ) + '%';
+				document.body.style.height = ( scale * 100 ) + '%';
+				document.body.style.zoom = scale;
+			}
+		}
+
+		level = scale;
 	}
 
+	/**
+	 * Pan the document when the mosue cursor approaches the edges 
+	 * of the window.
+	 */
 	function pan() {
-		var range = 0.15,
+		var range = 0.12,
 			rangeX = window.innerWidth * range,
 			rangeY = window.innerHeight * range;
 		
@@ -93,7 +176,19 @@ var zoom = (function(){
 	}
 
 	return {
+		/**
+		 * Zooms in on either a rectangle or HTML element.
+		 * 
+		 * @param {Object} options
+		 *   - element: HTML element to zoom in on
+		 *   OR
+		 *   - x/y: coordinates in non-transformed space to zoom in on
+		 *   - width/height: the portion of the screen to zoom in on
+		 *   - scale: can be used instead of width/height explicitly set scale
+		 */
 		in: function( options ) {
+			// Due to an implementation limitation we can't zoom in
+			// to another element without zooming our first
 			if( level !== 1 ) {
 				zoom.out();
 			}
@@ -103,6 +198,7 @@ var zoom = (function(){
 
 				// If an element is set, that takes precedence
 				if( !!options.element ) {
+					// Space around the zoomed in element to leave on screen
 					var padding = 20;
 
 					options.width = options.element.getBoundingClientRect().width + ( padding * 2 );
@@ -120,11 +216,10 @@ var zoom = (function(){
 					options.x *= options.scale;
 					options.y *= options.scale;
 
-					prefix( 'TransformOrigin', window.scrollX + 'px ' + window.scrollY + 'px' );
-					prefix( 'Transform', 'translate('+ -options.x +'px, '+ -options.y +'px) scale('+ options.scale +')' );
+					magnify( window.scrollX, window.scrollY, options.x, options.y, options.scale );
 
-					level = options.scale;
-
+					// Wait with engaging panning as it may conflict with the
+					// zoom transition
 					panEngageTimeout = setTimeout( function() {
 						panUpdateInterval = setInterval( pan, 1000 / 60 );
 					}, 800 );
@@ -132,16 +227,18 @@ var zoom = (function(){
 			}
 		},
 
+		/**
+		 * Resets the document zoom state to its default.
+		 */
 		out: function() {
 			clearTimeout( panEngageTimeout );
 			clearInterval( panUpdateInterval );
 
-			prefix( 'TransformOrigin', window.scrollX + 'px ' + window.scrollY + 'px' );
-			prefix( 'Transform', '' );
+			magnify( window.scrollX, window.scrollY, 0, 0, 1 );
 
 			level = 1;
 		},
-
+		
 		zoomLevel: function() {
 			return level;
 		}

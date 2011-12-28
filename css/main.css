@@ -1,3 +1,8 @@
+/**
+ * These styles are only here to make the demo page prettier,
+ * not used by zoom.js itself.
+ */
+
 html, body {
 	font-family: 'Lato', Times, 'Times New Roman', serif;
 	font-size: 16px;
@@ -20,6 +25,10 @@ header {
 	line-height: 1.3em;
 }
 
+header div {
+	margin-top: 15px;
+}
+
 h2 {
 	margin-bottom: 5px;
 	
@@ -39,6 +48,10 @@ p {
 
 a {
 	color: cyan;
+}
+
+em {
+	font-style: italic;
 }
 
 #main {
