@@ -171,7 +171,7 @@ var zoom = (function(){
 		if( mouseX < rangeX ) {
 			window.scroll( scrollOffset.x - ( 1 - ( mouseX / rangeX ) ) * ( 14 / level ), scrollOffset.y );
 		}
-		// Rirght
+		// Right
 		else if( mouseX > window.innerWidth - rangeX ) {
 			window.scroll( scrollOffset.x + ( 1 - ( window.innerWidth - mouseX ) / rangeX ) * ( 14 / level ), scrollOffset.y );
 		}
@@ -193,11 +193,11 @@ var zoom = (function(){
 		 *   OR
 		 *   - x/y: coordinates in non-transformed space to zoom in on
 		 *   - width/height: the portion of the screen to zoom in on
-		 *   - scale: can be used instead of width/height explicitly set scale
+		 *   - scale: can be used instead of width/height to explicitly set scale
 		 */
 		'in': function( options ) {
 			// Due to an implementation limitation we can't zoom in
-			// to another element without zooming our first
+			// to another element without zooming out first
 			if( level !== 1 ) {
 				zoom.out();
 			}
@@ -216,7 +216,7 @@ var zoom = (function(){
 					options.y = options.element.getBoundingClientRect().top - padding;
 				}
 
-				// If width/height values are set, calculate scale from those
+				// If width/height values are set, calculate scale from those values
 				if( options.width !== undefined && options.height !== undefined ) {
 					options.scale = Math.max( Math.min( window.innerWidth / options.width, window.innerHeight / options.height ), 1 );
 				}
