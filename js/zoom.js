@@ -66,19 +66,19 @@ var zoom = (function(){
 		panUpdateInterval = -1;
 
 	// Check for transform support so that we can fallback otherwise
-	var supportsTransforms =  document.body.style.WebkitTransform !== undefined || 
-                    		  document.body.style.MozTransform !== undefined ||
-                    		  document.body.style.msTransform !== undefined ||
+	var supportsTransforms =  document.body.style.transform !== undefined ||
                     		  document.body.style.OTransform !== undefined ||
-                    		  document.body.style.transform !== undefined;
+                    		  document.body.style.msTransform !== undefined ||
+                    		  document.body.style.MozTransform !== undefined ||
+                    		  document.body.style.WebkitTransform !== undefined;
     
 	if( supportsTransforms ) {
 		// The easing that will be applied when we zoom in/out
-		document.body.style.WebkitTransition = '-webkit-transform 0.8s ease';
-		document.body.style.MozTransition = '-moz-transform 0.8s ease';
-		document.body.style.msTransition = '-ms-transform 0.8s ease';
-		document.body.style.OTransition = '-o-transform 0.8s ease';
 		document.body.style.transition = 'transform 0.8s ease';
+		document.body.style.OTransition = '-o-transform 0.8s ease';
+		document.body.style.msTransition = '-ms-transform 0.8s ease';
+		document.body.style.MozTransition = '-moz-transform 0.8s ease';
+		document.body.style.WebkitTransition = '-webkit-transform 0.8s ease';
 	}
 	
 	// Zoom out if the user hits escape
@@ -107,21 +107,22 @@ var zoom = (function(){
 	 * @param {Number} scale 
 	 */
 	function magnify( pageOffsetX, pageOffsetY, elementOffsetX, elementOffsetY, scale ) {
+
 		if( supportsTransforms ) {
 			var origin = pageOffsetX +'px '+ pageOffsetY +'px',
-				transform = 'translate( '+ -elementOffsetX +'px, '+ -elementOffsetY +'px ) scale( '+ scale +' )';
+				transform = 'translate('+ -elementOffsetX +'px,'+ -elementOffsetY +'px) scale('+ scale +')';
 			
-			document.body.style.WebkitTransformOrigin = origin;
-			document.body.style.MozTransformOrigin = origin;
-			document.body.style.msTransformOrigin = origin;
-			document.body.style.OTransformOrigin = origin;
 			document.body.style.transformOrigin = origin;
+			document.body.style.OTransformOrigin = origin;
+			document.body.style.msTransformOrigin = origin;
+			document.body.style.MozTransformOrigin = origin;
+			document.body.style.WebkitTransformOrigin = origin;
 
-			document.body.style.WebkitTransform = transform;
-			document.body.style.MozTransform = transform;
-			document.body.style.msTransform = transform;
-			document.body.style.OTransform = transform;
 			document.body.style.transform = transform;
+			document.body.style.OTransform = transform;
+			document.body.style.msTransform = transform;
+			document.body.style.MozTransform = transform;
+			document.body.style.WebkitTransform = transform;
 		}
 		else {
 			// Reset all values
@@ -154,24 +155,32 @@ var zoom = (function(){
 	function pan() {
 		var range = 0.12,
 			rangeX = window.innerWidth * range,
-			rangeY = window.innerHeight * range;
+			rangeY = window.innerHeight * range,
+			scrollOffset = getScrollOffset();
 		
 		// Up
 		if( mouseY < rangeY ) {
-			window.scroll( window.scrollX, window.scrollY - ( 1 - ( mouseY / rangeY ) ) * ( 14 / level ) );
+			window.scroll( scrollOffset.x, scrollOffset.y - ( 1 - ( mouseY / rangeY ) ) * ( 14 / level ) );
 		}
 		// Down
 		else if( mouseY > window.innerHeight - rangeY ) {
-			window.scroll( window.scrollX, window.scrollY + ( 1 - ( window.innerHeight - mouseY ) / rangeY ) * ( 14 / level ) );
+			window.scroll( scrollOffset.x, scrollOffset.y + ( 1 - ( window.innerHeight - mouseY ) / rangeY ) * ( 14 / level ) );
 		}
 
 		// Left
 		if( mouseX < rangeX ) {
-			window.scroll( window.scrollX - ( 1 - ( mouseX / rangeX ) ) * ( 14 / level ), window.scrollY );
+			window.scroll( scrollOffset.x - ( 1 - ( mouseX / rangeX ) ) * ( 14 / level ), scrollOffset.y );
 		}
 		// Rirght
 		else if( mouseX > window.innerWidth - rangeX ) {
-			window.scroll( window.scrollX + ( 1 - ( window.innerWidth - mouseX ) / rangeX ) * ( 14 / level ), window.scrollY );
+			window.scroll( scrollOffset.x + ( 1 - ( window.innerWidth - mouseX ) / rangeX ) * ( 14 / level ), scrollOffset.y );
+		}
+	}
+
+	function getScrollOffset() {
+		return {
+			x: window.scrollX !== undefined ? window.scrollX : window.pageXOffset,
+			y: window.scrollY !== undefined ? window.scrollY : window.pageXYffset
 		}
 	}
 
@@ -186,7 +195,7 @@ var zoom = (function(){
 		 *   - width/height: the portion of the screen to zoom in on
 		 *   - scale: can be used instead of width/height explicitly set scale
 		 */
-		in: function( options ) {
+		'in': function( options ) {
 			// Due to an implementation limitation we can't zoom in
 			// to another element without zooming our first
 			if( level !== 1 ) {
@@ -216,7 +225,9 @@ var zoom = (function(){
 					options.x *= options.scale;
 					options.y *= options.scale;
 
-					magnify( window.scrollX, window.scrollY, options.x, options.y, options.scale );
+					var scrollOffset = getScrollOffset();
+
+					magnify( scrollOffset.x, scrollOffset.y, options.x, options.y, options.scale );
 
 					// Wait with engaging panning as it may conflict with the
 					// zoom transition
@@ -230,16 +241,21 @@ var zoom = (function(){
 		/**
 		 * Resets the document zoom state to its default.
 		 */
-		out: function() {
+		'out': function() {
 			clearTimeout( panEngageTimeout );
 			clearInterval( panUpdateInterval );
 
-			magnify( window.scrollX, window.scrollY, 0, 0, 1 );
+			var scrollOffset = getScrollOffset();
+			
+			magnify( scrollOffset.x, scrollOffset.y, 0, 0, 1 );
 
 			level = 1;
 		},
+
+		// Alias for 'in'
+		'magnify': function( options ) { this['in']( options ) },
 		
-		zoomLevel: function() {
+		'zoomLevel': function() {
 			return level;
 		}
 	}

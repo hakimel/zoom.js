@@ -2,7 +2,7 @@
 
 Enables a minimal JS API for zooming in on specific points or DOM elements.
 
-*Note that this is only a proof of concept so don't use it for anything important.*
+*Note that this is only a proof of concept so don't use it for anything important. Does not work in IE, yet.*
 
 [Try out the demo](http://lab.hakim.se/zoom-js/).
 
