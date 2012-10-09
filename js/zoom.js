@@ -1,56 +1,9 @@
-/**
- * Copyright (C) 2011 Hakim El Hattab, http://hakim.se
+/*!
+ * zoom.js 0.2
+ * http://lab.hakim.se/zoom-js
+ * MIT licensed
  * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- * 
- * 
- * #############################################################################
- * 
- * 
- * zoom.js enables an easy API for magnifying the DOM on 
- * any given location. It supports zooming in on either a 
- * rectangle or element in the current document:
- * 
- * zoom.in({ 
- * 	element: document.querySelector( 'img' ) 
- * });
- * 
- * zoom.in({
- *   x: 100,
- *   y: 200,
- *   width: 300,
- *   height: 300
- * });
- * 
- * zoom.out();
- * 
- * 
- * 
- * Note #1: this is currently just a proof of concept, don't 
- * use it for anything important.
- * 
- * Note #2: zoom.js works by adjusting the transform, transition,
- * transform-origin and zoom (IE) CSS properties of the <body> node
- * and may conflict with your own styles. 
- * 
- * @author Hakim El Hattab | http://hakim.se
- * @version 0.1
+ * Copyright (C) 2011-2012 Hakim El Hattab, http://hakim.se
  */
 var zoom = (function(){
 
@@ -66,11 +19,11 @@ var zoom = (function(){
 		panUpdateInterval = -1;
 
 	// Check for transform support so that we can fallback otherwise
-	var supportsTransforms =  document.body.style.transform !== undefined ||
-                    		  document.body.style.OTransform !== undefined ||
-                    		  document.body.style.msTransform !== undefined ||
-                    		  document.body.style.MozTransform !== undefined ||
-                    		  document.body.style.WebkitTransform !== undefined;
+	var supportsTransforms = 	'WebkitTransform' in document.body.style ||
+								'MozTransform' in document.body.style ||
+								'msTransform' in document.body.style ||
+								'OTransform' in document.body.style ||
+								'transform' in document.body.style;
     
 	if( supportsTransforms ) {
 		// The easing that will be applied when we zoom in/out
@@ -195,7 +148,7 @@ var zoom = (function(){
 		 *   - width/height: the portion of the screen to zoom in on
 		 *   - scale: can be used instead of width/height to explicitly set scale
 		 */
-		'in': function( options ) {
+		to: function( options ) {
 			// Due to an implementation limitation we can't zoom in
 			// to another element without zooming out first
 			if( level !== 1 ) {
@@ -229,11 +182,15 @@ var zoom = (function(){
 
 					magnify( scrollOffset.x, scrollOffset.y, options.x, options.y, options.scale );
 
-					// Wait with engaging panning as it may conflict with the
-					// zoom transition
-					panEngageTimeout = setTimeout( function() {
-						panUpdateInterval = setInterval( pan, 1000 / 60 );
-					}, 800 );
+					if( options.pan !== false ) {
+
+						// Wait with engaging panning as it may conflict with the
+						// zoom transition
+						panEngageTimeout = setTimeout( function() {
+							panUpdateInterval = setInterval( pan, 1000 / 60 );
+						}, 800 );
+
+					}
 				}
 			}
 		},
@@ -241,7 +198,7 @@ var zoom = (function(){
 		/**
 		 * Resets the document zoom state to its default.
 		 */
-		'out': function() {
+		out: function() {
 			clearTimeout( panEngageTimeout );
 			clearInterval( panUpdateInterval );
 
@@ -252,10 +209,11 @@ var zoom = (function(){
 			level = 1;
 		},
 
-		// Alias for 'in'
-		'magnify': function( options ) { this['in']( options ) },
+		// Alias
+		magnify: function( options ) { this.to( options ) },
+		reset: function() { this.out() },
 		
-		'zoomLevel': function() {
+		zoomLevel: function() {
 			return level;
 		}
 	}
