@@ -133,7 +133,7 @@ var zoom = (function(){
 	function getScrollOffset() {
 		return {
 			x: window.scrollX !== undefined ? window.scrollX : window.pageXOffset,
-			y: window.scrollY !== undefined ? window.scrollY : window.pageXYffset
+			y: window.scrollY !== undefined ? window.scrollY : window.pageYOffset
 		}
 	}
 
