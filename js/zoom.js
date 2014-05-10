@@ -210,6 +210,7 @@ var zoom = (function(){
 		},
 
 		// Alias
+		in: function( options ) { this.to( options ) },
 		magnify: function( options ) { this.to( options ) },
 		reset: function() { this.out() },
 
