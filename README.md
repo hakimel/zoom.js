@@ -11,8 +11,8 @@ Enables a minimal JS API for zooming in on specific points or DOM elements.
 #### Zoom in on an element:
 
 ```
-  zoom.to({ 
-    element: document.querySelector( 'img' ) 
+  zoom.to({
+    element: document.querySelector( 'img' )
   });
 ```
 
@@ -44,4 +44,4 @@ Enables a minimal JS API for zooming in on specific points or DOM elements.
 
 MIT licensed
 
-Copyright (C) 2011-2012 Hakim El Hattab, http://hakim.se
+Copyright (C) 2011-2014 Hakim El Hattab, http://hakim.se
