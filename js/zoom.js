@@ -50,21 +50,23 @@ var zoom = (function(){
 	} );
 
 	/**
-	 * Applies the CSS required to zoom in, prioritizes use of CSS3
+	 * Applies the CSS required to zoom in, prefers the use of CSS3
 	 * transforms but falls back on zoom for IE.
 	 *
-	 * @param {Number} x
-	 * @param {Number} y
-	 * @param {Number} width
-	 * @param {Number} height
+	 * @param {Object} rect
 	 * @param {Number} scale
 	 */
-	function magnify( x, y, width, height, scale ) {
+	function magnify( rect, scale ) {
 
 		var scrollOffset = getScrollOffset();
 
-		x -= ( window.innerWidth - ( width * scale ) ) / 2;
-		y -= ( window.innerHeight - ( height * scale ) ) / 2;
+		// Ensure a width/height is set
+		rect.width = rect.width || 1;
+		rect.height = rect.height || 1;
+
+		// Center the rect within the zoomed viewport
+		rect.x -= ( window.innerWidth - ( rect.width * scale ) ) / 2;
+		rect.y -= ( window.innerHeight - ( rect.height * scale ) ) / 2;
 
 		if( supportsTransforms ) {
 			// Reset
@@ -78,7 +80,7 @@ var zoom = (function(){
 			// Scale
 			else {
 				var origin = scrollOffset.x +'px '+ scrollOffset.y +'px',
-					transform = 'translate('+ -x +'px,'+ -y +'px) scale('+ scale +')';
+					transform = 'translate('+ -rect.x +'px,'+ -rect.y +'px) scale('+ scale +')';
 
 				document.body.style.transformOrigin = origin;
 				document.body.style.OTransformOrigin = origin;
@@ -106,8 +108,8 @@ var zoom = (function(){
 			// Scale
 			else {
 				document.body.style.position = 'relative';
-				document.body.style.left = ( - ( scrollOffset.x + x ) / scale ) + 'px';
-				document.body.style.top = ( - ( scrollOffset.y + y ) / scale ) + 'px';
+				document.body.style.left = ( - ( scrollOffset.x + rect.x ) / scale ) + 'px';
+				document.body.style.top = ( - ( scrollOffset.y + rect.y ) / scale ) + 'px';
 				document.body.style.width = ( scale * 100 ) + '%';
 				document.body.style.height = ( scale * 100 ) + '%';
 				document.body.style.zoom = scale;
@@ -165,6 +167,7 @@ var zoom = (function(){
 		 *   - scale: can be used instead of width/height to explicitly set scale
 		 */
 		to: function( options ) {
+
 			// Due to an implementation limitation we can't zoom in
 			// to another element without zooming out first
 			if( level !== 1 ) {
@@ -195,7 +198,7 @@ var zoom = (function(){
 					options.x *= options.scale;
 					options.y *= options.scale;
 
-					magnify( options.x, options.y, options.width || 1, options.height || 1, options.scale );
+					magnify( options, options.scale );
 
 					if( options.pan !== false ) {
 
@@ -217,7 +220,7 @@ var zoom = (function(){
 			clearTimeout( panEngageTimeout );
 			clearInterval( panUpdateInterval );
 
-			magnify( 0, 0, 1, 1, 1 );
+			magnify( { x: 0, y: 0 }, 1 );
 
 			level = 1;
 		},
