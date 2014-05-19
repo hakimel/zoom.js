@@ -9,42 +9,14 @@ html, body {
 	color: #eee;
 }
 
-body {
-	margin: 0px;
-}
-
 html {
 	background: #323232;
 }
 
-header {
-	background: rgba(0, 0, 0, 0.2);
-	margin-bottom: 30px;
-	padding: 20px 100px 20px 20px;
-	font-size: 20px;
-	line-height: 1.3em;
+body {
+	margin: 0;
 }
 
-header div {
-	margin-top: 15px;
-}
-
-h2 {
-	margin-bottom: 5px;
-
-	color: #eee;
-
-	font-family: 'Lato', sans-serif;
-	line-height: 0.9em;
-	letter-spacing: 0.02em;
-
-	font-weight: bold;
-}
-
-p {
-	margin: 0px 80px 40px 0px;
-	line-height: 1.1em;
-}
 
 a {
 	color: cyan;
@@ -54,12 +26,40 @@ em {
 	font-style: italic;
 }
 
-#main {
-	margin: 20px;
+.page-header,
+.page-body {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 40px;
+}
 
-	-webkit-column-count: 2;
-	   -moz-column-count: 2;
-	    -ms-column-count: 2;
-	     -o-column-count: 2;
-	        column-count: 2;
+.page-header {
+	background: rgba(0, 0, 0, 0.2);
+	font-size: 20px;
+	line-height: 1.4;
+}
+
+.page-header div {
+	margin-top: 15px;
+}
+
+.page-body {
+	line-height: 1.4;
+	font-size: 16px;
+}
+
+.page-body p {
+	margin-bottom: 40px;
+}
+
+.page-body h2 {
+	margin-bottom: 5px;
+
+	color: #eee;
+
+	font-family: 'Lato', sans-serif;
+	line-height: 0.9em;
+	letter-spacing: 0.02em;
+
+	font-weight: bold;
 }
