@@ -1,5 +1,5 @@
 /*!
- * zoom.js 0.2
+ * zoom.js 0.3
  * http://lab.hakim.se/zoom-js
  * MIT licensed
  *
@@ -53,32 +53,48 @@ var zoom = (function(){
 	 * Applies the CSS required to zoom in, prioritizes use of CSS3
 	 * transforms but falls back on zoom for IE.
 	 *
-	 * @param {Number} pageOffsetX
-	 * @param {Number} pageOffsetY
-	 * @param {Number} elementOffsetX
-	 * @param {Number} elementOffsetY
+	 * @param {Number} x
+	 * @param {Number} y
+	 * @param {Number} width
+	 * @param {Number} height
 	 * @param {Number} scale
 	 */
-	function magnify( pageOffsetX, pageOffsetY, elementOffsetX, elementOffsetY, scale ) {
+	function magnify( x, y, width, height, scale ) {
+
+		var scrollOffset = getScrollOffset();
+
+		x -= ( window.innerWidth - ( width * scale ) ) / 2;
+		y -= ( window.innerHeight - ( height * scale ) ) / 2;
 
 		if( supportsTransforms ) {
-			var origin = pageOffsetX +'px '+ pageOffsetY +'px',
-				transform = 'translate('+ -elementOffsetX +'px,'+ -elementOffsetY +'px) scale('+ scale +')';
+			// Reset
+			if( scale === 1 ) {
+				document.body.style.transform = '';
+				document.body.style.OTransform = '';
+				document.body.style.msTransform = '';
+				document.body.style.MozTransform = '';
+				document.body.style.WebkitTransform = '';
+			}
+			// Scale
+			else {
+				var origin = scrollOffset.x +'px '+ scrollOffset.y +'px',
+					transform = 'translate('+ -x +'px,'+ -y +'px) scale('+ scale +')';
 
-			document.body.style.transformOrigin = origin;
-			document.body.style.OTransformOrigin = origin;
-			document.body.style.msTransformOrigin = origin;
-			document.body.style.MozTransformOrigin = origin;
-			document.body.style.WebkitTransformOrigin = origin;
+				document.body.style.transformOrigin = origin;
+				document.body.style.OTransformOrigin = origin;
+				document.body.style.msTransformOrigin = origin;
+				document.body.style.MozTransformOrigin = origin;
+				document.body.style.WebkitTransformOrigin = origin;
 
-			document.body.style.transform = transform;
-			document.body.style.OTransform = transform;
-			document.body.style.msTransform = transform;
-			document.body.style.MozTransform = transform;
-			document.body.style.WebkitTransform = transform;
+				document.body.style.transform = transform;
+				document.body.style.OTransform = transform;
+				document.body.style.msTransform = transform;
+				document.body.style.MozTransform = transform;
+				document.body.style.WebkitTransform = transform;
+			}
 		}
 		else {
-			// Reset all values
+			// Reset
 			if( scale === 1 ) {
 				document.body.style.position = '';
 				document.body.style.left = '';
@@ -87,11 +103,11 @@ var zoom = (function(){
 				document.body.style.height = '';
 				document.body.style.zoom = '';
 			}
-			// Apply scale
+			// Scale
 			else {
 				document.body.style.position = 'relative';
-				document.body.style.left = ( - ( pageOffsetX + elementOffsetX ) / scale ) + 'px';
-				document.body.style.top = ( - ( pageOffsetY + elementOffsetY ) / scale ) + 'px';
+				document.body.style.left = ( - ( scrollOffset.x + x ) / scale ) + 'px';
+				document.body.style.top = ( - ( scrollOffset.y + y ) / scale ) + 'px';
 				document.body.style.width = ( scale * 100 ) + '%';
 				document.body.style.height = ( scale * 100 ) + '%';
 				document.body.style.zoom = scale;
@@ -162,11 +178,12 @@ var zoom = (function(){
 				if( !!options.element ) {
 					// Space around the zoomed in element to leave on screen
 					var padding = 20;
+					var bounds = options.element.getBoundingClientRect();
 
-					options.width = options.element.getBoundingClientRect().width + ( padding * 2 );
-					options.height = options.element.getBoundingClientRect().height + ( padding * 2 );
-					options.x = options.element.getBoundingClientRect().left - padding;
-					options.y = options.element.getBoundingClientRect().top - padding;
+					options.x = bounds.left - padding;
+					options.y = bounds.top - padding;
+					options.width = bounds.width + ( padding * 2 );
+					options.height = bounds.height + ( padding * 2 );
 				}
 
 				// If width/height values are set, calculate scale from those values
@@ -178,9 +195,7 @@ var zoom = (function(){
 					options.x *= options.scale;
 					options.y *= options.scale;
 
-					var scrollOffset = getScrollOffset();
-
-					magnify( scrollOffset.x, scrollOffset.y, options.x, options.y, options.scale );
+					magnify( options.x, options.y, options.width || 1, options.height || 1, options.scale );
 
 					if( options.pan !== false ) {
 
@@ -202,9 +217,7 @@ var zoom = (function(){
 			clearTimeout( panEngageTimeout );
 			clearInterval( panUpdateInterval );
 
-			var scrollOffset = getScrollOffset();
-
-			magnify( scrollOffset.x, scrollOffset.y, 0, 0, 1 );
+			magnify( 0, 0, 1, 1, 1 );
 
 			level = 1;
 		},
