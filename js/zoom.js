@@ -18,6 +18,9 @@ var zoom = (function(){
 	var panEngageTimeout = -1,
 		panUpdateInterval = -1;
 
+	// Timeout for call back function
+	var callbackTimeout = -1;
+
 	// Check for transform support so that we can fallback otherwise
 	var supportsTransforms = 	'WebkitTransform' in document.body.style ||
 								'MozTransform' in document.body.style ||
@@ -159,12 +162,18 @@ var zoom = (function(){
 		/**
 		 * Zooms in on either a rectangle or HTML element.
 		 *
+		 * (necessary)
 		 * @param {Object} options
+		 *
+		 *   (necessary)
 		 *   - element: HTML element to zoom in on
 		 *   OR
 		 *   - x/y: coordinates in non-transformed space to zoom in on
 		 *   - width/height: the portion of the screen to zoom in on
 		 *   - scale: can be used instead of width/height to explicitly set scale
+		 *
+		 *   (optional)
+		 *   - callback: call back when zooming in ends
 		 */
 		to: function( options ) {
 
@@ -209,18 +218,36 @@ var zoom = (function(){
 						}, 800 );
 
 					}
+
+					if ( !!options.callback ) {
+	 						callbackTimeout = setTimeout ( function () {
+	    					options.callback();
+						}, 800);
+					}
 				}
 			}
 		},
 
 		/**
 		 * Resets the document zoom state to its default.
+		 *
+		 * (optional)
+		 * @param {Object} options
+		 *   - callback: call back when zooming out ends
+		 *
 		 */
-		out: function() {
+		out: function( options ) {
 			clearTimeout( panEngageTimeout );
 			clearInterval( panUpdateInterval );
+			clearTimeout( callbackTimeout );
 
 			magnify( { x: 0, y: 0 }, 1 );
+
+			if( typeof options !== "undefined" && typeof options.callback !== "undefined"){
+       			setTimeout ( function () {
+            		options.callback();          
+        		}, 800);
+      		}
 
 			level = 1;
 		},
