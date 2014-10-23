@@ -208,6 +208,9 @@ var zoom = (function(){
 					options.x *= options.scale;
 					options.y *= options.scale;
 
+					options.x = (options.x < 0) ? 0 : options.x;
+					options.y = (options.y < 0) ? 0 : options.y;
+
 					magnify( options, options.scale );
 
 					if( options.pan !== false ) {
