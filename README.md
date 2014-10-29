@@ -12,7 +12,10 @@ Enables a minimal JS API for zooming in on specific points or DOM elements.
 
 ```
   zoom.to({
-    element: document.querySelector( 'img' )
+    element: document.querySelector( 'img' ),
+    callback: function() {
+      // done zooming
+    }
   });
 ```
 

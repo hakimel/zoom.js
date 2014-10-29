@@ -7,6 +7,8 @@
  */
 var zoom = (function(){
 
+	var TRANSITION_DURATION = 800;
+
 	// The current zoom level (scale)
 	var level = 1;
 
@@ -18,7 +20,7 @@ var zoom = (function(){
 	var panEngageTimeout = -1,
 		panUpdateInterval = -1;
 
-	// Timeout for call back function
+	// Timeout for callback function
 	var callbackTimeout = -1;
 
 	// Check for transform support so that we can fallback otherwise
@@ -30,11 +32,11 @@ var zoom = (function(){
 
 	if( supportsTransforms ) {
 		// The easing that will be applied when we zoom in/out
-		document.body.style.transition = 'transform 0.8s ease';
-		document.body.style.OTransition = '-o-transform 0.8s ease';
-		document.body.style.msTransition = '-ms-transform 0.8s ease';
-		document.body.style.MozTransition = '-moz-transform 0.8s ease';
-		document.body.style.WebkitTransition = '-webkit-transform 0.8s ease';
+		document.body.style.transition = 'transform '+ TRANSITION_DURATION +'ms ease';
+		document.body.style.OTransition = '-o-transform '+ TRANSITION_DURATION +'ms ease';
+		document.body.style.msTransition = '-ms-transform '+ TRANSITION_DURATION +'ms ease';
+		document.body.style.MozTransition = '-moz-transform '+ TRANSITION_DURATION +'ms ease';
+		document.body.style.WebkitTransition = '-webkit-transform '+ TRANSITION_DURATION +'ms ease';
 	}
 
 	// Zoom out if the user hits escape
@@ -123,7 +125,7 @@ var zoom = (function(){
 	}
 
 	/**
-	 * Pan the document when the mosue cursor approaches the edges
+	 * Pan the document when the mouse cursor approaches the edges
 	 * of the window.
 	 */
 	function pan() {
@@ -162,10 +164,9 @@ var zoom = (function(){
 		/**
 		 * Zooms in on either a rectangle or HTML element.
 		 *
-		 * (necessary)
 		 * @param {Object} options
 		 *
-		 *   (necessary)
+		 *   (required)
 		 *   - element: HTML element to zoom in on
 		 *   OR
 		 *   - x/y: coordinates in non-transformed space to zoom in on
@@ -215,14 +216,12 @@ var zoom = (function(){
 						// zoom transition
 						panEngageTimeout = setTimeout( function() {
 							panUpdateInterval = setInterval( pan, 1000 / 60 );
-						}, 800 );
+						}, TRANSITION_DURATION );
 
 					}
 
-					if ( !!options.callback ) {
-	 						callbackTimeout = setTimeout ( function () {
-	    					options.callback();
-						}, 800);
+					if( typeof options.callback === 'function' ) {
+						callbackTimeout = setTimeout( options.callback, TRANSITION_DURATION );
 					}
 				}
 			}
@@ -231,10 +230,8 @@ var zoom = (function(){
 		/**
 		 * Resets the document zoom state to its default.
 		 *
-		 * (optional)
 		 * @param {Object} options
 		 *   - callback: call back when zooming out ends
-		 *
 		 */
 		out: function( options ) {
 			clearTimeout( panEngageTimeout );
@@ -243,11 +240,9 @@ var zoom = (function(){
 
 			magnify( { x: 0, y: 0 }, 1 );
 
-			if( typeof options !== "undefined" && typeof options.callback !== "undefined"){
-       			setTimeout ( function () {
-            		options.callback();          
-        		}, 800);
-      		}
+			if( options && typeof options.callback === 'function' ) {
+				setTimeout( options.callback, TRANSITION_DURATION );
+			}
 
 			level = 1;
 		},
