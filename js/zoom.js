@@ -175,6 +175,7 @@ var zoom = (function(){
 		 *
 		 *   (optional)
 		 *   - callback: call back when zooming in ends
+		 *   - padding: space around of zoomed in element
 		 */
 		to: function( options ) {
 
@@ -190,7 +191,7 @@ var zoom = (function(){
 				// If an element is set, that takes precedence
 				if( !!options.element ) {
 					// Space around the zoomed in element to leave on screen
-					var padding = 20;
+					var padding = (typeof options.padding === "undefined") ? (20) : (options.padding);
 					var bounds = options.element.getBoundingClientRect();
 
 					options.x = bounds.left - padding;
@@ -207,6 +208,9 @@ var zoom = (function(){
 				if( options.scale > 1 ) {
 					options.x *= options.scale;
 					options.y *= options.scale;
+
+					options.x = (options.x < 0) ? 0 : options.x;
+					options.y = (options.y < 0) ? 0 : options.y;
 
 					magnify( options, options.scale );
 
